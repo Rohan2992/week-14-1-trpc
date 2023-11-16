@@ -1,0 +1,17 @@
+{
+  "name": "week-14-1-trpc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@trpc/client": "^10.43.3",
+    "@trpc/server": "^10.43.3",
+    "zod": "^3.22.4"
+  }
+}
