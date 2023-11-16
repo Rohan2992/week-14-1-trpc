@@ -7,7 +7,12 @@ import type { AppRouter } from "../server";
 const trpc = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: "http://localhost:3000"
+      url: "http://localhost:3000",
+      async headers() {
+        return {
+          authorization: "Bearer 1234"
+        };
+      }
     })
   ]
 });

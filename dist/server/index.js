@@ -27,12 +27,19 @@ const appRouter = (0, trpc_1.router)({
     signUp: trpc_1.publicProcedure
         .input(zod_1.z.object({ email: zod_1.z.string().email(), password: zod_1.z.string() }))
         .mutation((opts) => __awaiter(void 0, void 0, void 0, function* () {
-        const username = opts.input.email;
+        const username = opts.ctx.username;
+        const email = opts.input.email;
         const password = opts.input.password;
-        return { id: "New", username, password };
+        console.log(username);
+        return { id: "New", username, email, password };
     }))
 });
 const server = (0, standalone_1.createHTTPServer)({
-    router: appRouter
+    router: appRouter,
+    createContext(opts) {
+        const authHeaders = opts.req.headers["authorization"];
+        console.log(authHeaders);
+        return { username: authHeaders };
+    }
 });
 server.listen(3000);
