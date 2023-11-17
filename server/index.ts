@@ -1,43 +1,39 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import { publicProcedure, router } from "./trpc";
-import { z } from "zod";
+import { router } from "./trpc";
+import { userRouter } from "./routers/user";
+import { todoRouter } from "./routers/todo";
+import cors from "cors";
+import jwt from "jsonwebtoken";
+import { User, Todo } from "./db";
+import mongoose from "mongoose";
 
-const appRouter = router({
-  createTodo: publicProcedure
-    .input(
-      z.object({
-        title: z.string(),
-        description: z.string()
-      })
-    )
-    .query(async (opts) => {
-      const title = opts.input.title;
-      const description = opts.input.description;
+export const SECRET = "SECRET";
 
-      console.log("I m inside the server index.ts");
-      return { id: "1", title, description };
-    }),
+mongoose.connect("mongodb://localhost:27017/NEWTodoDB");
 
-  signUp: publicProcedure
-    .input(z.object({ email: z.string().email(), password: z.string() }))
-    .mutation(async (opts) => {
-      const username = opts.ctx.username;
-      const email = opts.input.email;
-      const password = opts.input.password;
-
-      // console.log(username);
-
-      return { id: "New", username, email, password };
-    })
-});
+const appRouter = router({ user: userRouter, todo: todoRouter });
 
 const server = createHTTPServer({
   router: appRouter,
+  middleware: cors(),
   createContext(opts) {
     const authHeaders = opts.req.headers["authorization"];
-    console.log(authHeaders);
 
-    return { username: authHeaders };
+    if (authHeaders) {
+      const token = authHeaders.split(" ")[1];
+      console.log(token);
+      return new Promise((resolve) => {
+        jwt.verify(token, SECRET, (err, user) => {
+          if (user) {
+            resolve({ userId: user.userId, db: { Todo, User } });
+          } else {
+            resolve({ db: { Todo, User } });
+          }
+        });
+      });
+    }
+
+    return { db: { Todo, User } };
   }
 });
 
